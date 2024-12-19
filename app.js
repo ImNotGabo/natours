@@ -3,6 +3,9 @@ const express = require('express');
 
 const app = express();
 
+// Middleware
+app.use(express.json());
+
 /* app.get('/', (req, res) => {
 	res
 		.status(200)
@@ -23,6 +26,26 @@ app.get('/api/v1/tours', (req, res) => {
 		results: tours.length,
 		data: { tours },
 	});
+});
+
+app.post('/api/v1/tours', (req, res) => {
+	// console.log(req.body);
+	const newId = tours[tours.length - 1].id + 1;
+	const newTour = Object.assign({ id: newId }, req.body);
+	tours.push(newTour);
+	fs.writeFile(
+		`${__dirname}/dev-data/data/tour-simple.json`,
+		JSON.stringify(tours),
+		(err) => {
+			console.error(err);
+			res.status(201).json({
+				status: 'sucess',
+				data: {
+					tour: newTour,
+				},
+			});
+		}
+	);
 });
 
 const port = 3000;
