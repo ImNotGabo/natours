@@ -1,4 +1,4 @@
-const fs = require('node:fs');
+const { writeFile } = require('node:fs/promises');
 const express = require('express');
 
 const app = express();
@@ -22,7 +22,7 @@ const tours = JSON.parse(
 
 app.get('/api/v1/tours', (req, res) => {
 	res.status(200).json({
-		status: 'sucess',
+		status: 'success',
 		results: tours.length,
 		data: { tours },
 	});
@@ -30,7 +30,7 @@ app.get('/api/v1/tours', (req, res) => {
 
 // URL Params
 app.get('/api/v1/tours/:id/', (req, res) => {
-	console.log(req.params);
+	// console.log(req.params);
 	const id = parseInt(req.params.id);
 	if (id > tours.length) {
 		return res.status(404).json({
@@ -40,29 +40,28 @@ app.get('/api/v1/tours/:id/', (req, res) => {
 	}
 	const tour = tours.find((ele) => ele.id === id);
 	res.status(200).json({
-		status: 'sucess',
+		status: 'success',
 		data: { tour },
 	});
 });
 
-app.post('/api/v1/tours', (req, res) => {
+app.post('/api/v1/tours', async (req, res) => {
 	// console.log(req.body);
 	const newId = tours[tours.length - 1].id + 1;
 	const newTour = Object.assign({ id: newId }, req.body);
 	tours.push(newTour);
-	fs.writeFile(
-		`${__dirname}/dev-data/data/tour-simple.json`,
-		JSON.stringify(tours),
-		(err) => {
-			console.error(err);
-			res.status(201).json({
-				status: 'sucess',
-				data: {
-					tour: newTour,
-				},
-			});
-		}
-	);
+	try {
+		await writeFile(
+			`${__dirname}/dev-data/data/tour-simple.json`,
+			JSON.stringify(tours)
+		);
+		return res.status(201).json({
+			status: 'success',
+			message: 'New tour',
+		});
+	} catch (error) {
+		console.error(error);
+	}
 });
 
 const port = 3000;
