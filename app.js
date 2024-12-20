@@ -1,3 +1,4 @@
+const fs = require('node:fs');
 const { writeFile } = require('node:fs/promises');
 const express = require('express');
 
@@ -46,7 +47,7 @@ app.get('/api/v1/tours/:id/', (req, res) => {
 });
 
 app.post('/api/v1/tours', async (req, res) => {
-	// console.log(req.body);
+	console.log(req.body);
 	const newId = tours[tours.length - 1].id + 1;
 	const newTour = Object.assign({ id: newId }, req.body);
 	tours.push(newTour);
@@ -57,14 +58,16 @@ app.post('/api/v1/tours', async (req, res) => {
 		);
 		return res.status(201).json({
 			status: 'success',
-			message: 'New tour',
+			data: {
+				tour: newTour,
+			},
 		});
 	} catch (error) {
 		console.error(error);
 	}
 });
 
-const port = 3000;
+const port = process.env.PORT || 3000;
 app.listen(port, () => {
 	console.log(`App runinng on ${port}...`);
 });
