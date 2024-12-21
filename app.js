@@ -8,15 +8,15 @@ const app = express();
 // Middleware
 app.use(express.json());
 
-/* app.get('/', (req, res) => {
-	res
-		.status(200)
-		.json({ message: 'Hello from the server side!', app: 'Natours' });
+app.use((req, res, next) => {
+	console.log('Hello from Middleware👋');
+	next();
 });
 
-app.post('/', (req, res) => {
-	res.send('You can post to this endpoint...');
-}); */
+app.use((req, res, next) => {
+	req.requestTime = new Date().toISOString();
+	next();
+});
 
 const tours = JSON.parse(
 	fs.readFileSync(`${__dirname}/dev-data/data/tour-simple.json`)
@@ -25,6 +25,7 @@ const tours = JSON.parse(
 const getAllTours = (req, res) => {
 	res.status(200).json({
 		status: 'success',
+		requestedAt: req.requestTime,
 		results: tours.length,
 		data: { tours },
 	});
@@ -56,8 +57,7 @@ const createTour = async (req, res) => {
 			});
 		}
 
-		const newId =
-			tours.length > 0 ? tours[tours.length - 1].id + 1 : 1;
+		const newId = tours.length > 0 ? tours[tours.length - 1].id + 1 : 1;
 		const newTour = { id: newId, ...req.body };
 
 		tours.push(newTour);
@@ -77,10 +77,7 @@ const createTour = async (req, res) => {
 		return res.status(500).json({
 			status: 'error',
 			message: 'Error to save tour',
-			error:
-				process.env.NODE_ENV === 'development'
-					? error.message
-					: undefined,
+			error: process.env.NODE_ENV === 'development' ? error.message : undefined,
 		});
 	}
 };
@@ -115,16 +112,9 @@ const deleteTour = (req, res) => {
 	});
 };
 
-app
-.route('/api/v1/tours')
-.get(getAllTours)
-.post(createTour);
+app.route('/api/v1/tours').get(getAllTours).post(createTour);
 
-app
-	.route('api/v1/tours/:id')
-	.get(getTour)
-	.patch(updateTour)
-	.delete(deleteTour);
+app.route('api/v1/tours/:id').get(getTour).patch(updateTour).delete(deleteTour);
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
