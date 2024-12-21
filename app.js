@@ -1,6 +1,7 @@
 const fs = require('node:fs');
 const { writeFile } = require('node:fs/promises');
 const express = require('express');
+const e = require('express');
 
 const app = express();
 
@@ -21,16 +22,15 @@ const tours = JSON.parse(
 	fs.readFileSync(`${__dirname}/dev-data/data/tour-simple.json`)
 );
 
-app.get('/api/v1/tours', (req, res) => {
+const getAllTours = (req, res) => {
 	res.status(200).json({
 		status: 'success',
 		results: tours.length,
 		data: { tours },
 	});
-});
+};
 
-// URL Params
-app.get('/api/v1/tours/:id/', (req, res) => {
+const getTour = (req, res) => {
 	// console.log(req.params);
 	const id = parseInt(req.params.id);
 	if (id > tours.length) {
@@ -44,9 +44,9 @@ app.get('/api/v1/tours/:id/', (req, res) => {
 		status: 'success',
 		data: { tour },
 	});
-});
+};
 
-app.post('/api/v1/tours', async (req, res) => {
+const createTour = async (req, res) => {
 	try {
 		// Basic body validation
 		if (!req.body) {
@@ -56,7 +56,8 @@ app.post('/api/v1/tours', async (req, res) => {
 			});
 		}
 
-		const newId = tours.length > 0 ? tours[tours.length - 1].id + 1 : 1;
+		const newId =
+			tours.length > 0 ? tours[tours.length - 1].id + 1 : 1;
 		const newTour = { id: newId, ...req.body };
 
 		tours.push(newTour);
@@ -76,12 +77,15 @@ app.post('/api/v1/tours', async (req, res) => {
 		return res.status(500).json({
 			status: 'error',
 			message: 'Error to save tour',
-			error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+			error:
+				process.env.NODE_ENV === 'development'
+					? error.message
+					: undefined,
 		});
 	}
-});
+};
 
-app.patch('/api/v1/tours/:id', (req, res) => {
+const updateTour = (req, res) => {
 	const id = parseInt(req.params.id);
 	if (id > tours.length) {
 		return res.status(404).json({
@@ -95,9 +99,9 @@ app.patch('/api/v1/tours/:id', (req, res) => {
 			tour: '<Updated tour here...>',
 		},
 	});
-});
+};
 
-app.delete('/api/v1/tours/:id', (req, res) => {
+const deleteTour = (req, res) => {
 	const id = parseInt(req.params.id);
 	if (id > tours.length) {
 		return res.status(404).json({
@@ -109,7 +113,18 @@ app.delete('/api/v1/tours/:id', (req, res) => {
 		status: 'success',
 		data: null,
 	});
-});
+};
+
+app
+.route('/api/v1/tours')
+.get(getAllTours)
+.post(createTour);
+
+app
+	.route('api/v1/tours/:id')
+	.get(getTour)
+	.patch(updateTour)
+	.delete(deleteTour);
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
