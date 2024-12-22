@@ -1,11 +1,13 @@
 const fs = require('node:fs');
 const { writeFile } = require('node:fs/promises');
 const express = require('express');
-const e = require('express');
+const morgan = require('morgan');
 
 const app = express();
 
 // Middleware
+app.use(morgan('dev'));
+
 app.use(express.json());
 
 app.use((req, res, next) => {
@@ -21,6 +23,8 @@ app.use((req, res, next) => {
 const tours = JSON.parse(
 	fs.readFileSync(`${__dirname}/dev-data/data/tour-simple.json`)
 );
+
+// Route handles
 
 const getAllTours = (req, res) => {
 	res.status(200).json({
@@ -112,9 +116,13 @@ const deleteTour = (req, res) => {
 	});
 };
 
+// Routes
+
 app.route('/api/v1/tours').get(getAllTours).post(createTour);
 
 app.route('api/v1/tours/:id').get(getTour).patch(updateTour).delete(deleteTour);
+
+// Start the server
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
