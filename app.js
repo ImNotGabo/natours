@@ -20,15 +20,9 @@ app.use((req, res, next) => {
 	next();
 });
 
-// Route handles
-
 // Routes
 
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 
-// Start the server
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-	console.log(`App runinng on ${port}...`);
-});
+module.exports = app;
