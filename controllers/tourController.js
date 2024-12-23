@@ -17,6 +17,17 @@ exports.checkID = (req, res, next, value) => {
 	next();
 };
 
+exports.checkBody = (req, res, next) => {
+	const { name, price } = req.body;
+	if (!name || !price) {
+		return res.status(400).json({
+			status: 'fail',
+			message: 'Missing name or price',
+		});
+	}
+	next();
+};
+
 exports.getAllTours = (req, res) => {
 	res.status(200).json({
 		status: 'success',
@@ -51,7 +62,7 @@ exports.createTour = async (req, res) => {
 		tours.push(newTour);
 
 		await writeFile(
-			`${__dirname}/dev-data/data/tour-simple.json`,
+			`${__dirname}/../dev-data/data/tour-simple.json`,
 			JSON.stringify(tours, null, 2) //JSON formant
 		);
 
