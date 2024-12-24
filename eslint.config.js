@@ -1,17 +1,11 @@
 import globals from 'globals';
 import pluginJs from '@eslint/js';
-import react from 'eslint-plugin-react';
-import prettier from 'eslint-config-prettier';
-import airbnb from 'eslint-config-airbnb';
 import importPlugin from 'eslint-plugin-import';
-import jsxA11y from 'eslint-plugin-jsx-a11y';
 import nodePlugin from 'eslint-plugin-node';
-import prettierPlugin from 'eslint-plugin-prettier';
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
 	pluginJs.configs.recommended,
-	// ...airbnb.rules,
 	{
 		languageOptions: {
 			globals: { ...globals.browser, ...globals.node },
@@ -19,42 +13,26 @@ export default [
 			sourceType: 'module',
 		},
 		plugins: {
-			react,
 			import: importPlugin,
-			'jsx-a11y': jsxA11y,
 			node: nodePlugin,
-			prettier: prettierPlugin,
 		},
 		rules: {
-			'prettier/prettier': [
-				'error',
-				{
-					endOfLine: 'auto',
-					singleQuote: true,
-				},
-			],
-			'react/react-in-jsx-scope': 'off',
-			'react/prop-types': 'off',
-			'react/jsx-props-no-spreading': 'off',
 			'import/prefer-default-export': 'off',
-			'jsx-a11y/anchor-is-valid': [
+			'no-unused-vars': [
 				'error',
-				{
-					components: ['Link'],
-					specialLink: ['href', 'to'],
-					aspects: ['invalidHref', 'preferButton'],
-				},
+				{ argsIgnorePattern: '^_|req|res|next|value' },
 			],
-			'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
 			'no-console': ['warn', { allow: ['warn', 'error'] }],
-			'react/function-component-definition': [
-				'error',
-				{
-					namedComponents: 'arrow-function',
-					unnamedComponents: 'arrow-function',
-				},
-			],
+			'spaced-comment': 'off',
+			'consistent-return': 'off',
+			'func-names': 'off',
+			'object-shorthand': 'off',
+			'no-process-exit': 'off',
+			'no-param-reassign': 'off',
+			'no-return-await': 'off',
+			'no-underscore-dangle': 'off',
+			'class-methods-use-this': 'off',
+			'prefer-destructuring': ['error', { object: true, array: false }],
 		},
 	},
-	prettier,
 ];
