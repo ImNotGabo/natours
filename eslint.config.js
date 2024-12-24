@@ -11,11 +11,11 @@ import prettierPlugin from 'eslint-plugin-prettier';
 /** @type {import('eslint').Linter.Config[]} */
 export default [
 	pluginJs.configs.recommended,
-	// airbnb,
+	// ...airbnb.rules,
 	{
 		languageOptions: {
 			globals: { ...globals.browser, ...globals.node },
-			ecmaVersion: 2021,
+			ecmaVersion: 2024,
 			sourceType: 'module',
 		},
 		plugins: {
@@ -43,6 +43,15 @@ export default [
 					components: ['Link'],
 					specialLink: ['href', 'to'],
 					aspects: ['invalidHref', 'preferButton'],
+				},
+			],
+			'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+			'no-console': ['warn', { allow: ['warn', 'error'] }],
+			'react/function-component-definition': [
+				'error',
+				{
+					namedComponents: 'arrow-function',
+					unnamedComponents: 'arrow-function',
 				},
 			],
 		},
