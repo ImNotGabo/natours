@@ -1,53 +1,51 @@
-import airbnbBase from 'eslint-config-airbnb-base';
-import prettierConfig from 'eslint-config-prettier';
-import eslintPluginPrettier from 'eslint-plugin-prettier';
-import eslintPluginImport from 'eslint-plugin-import';
+import globals from 'globals';
+import pluginJs from '@eslint/js';
+import react from 'eslint-plugin-react';
+import prettier from 'eslint-config-prettier';
+import airbnb from 'eslint-config-airbnb';
+import importPlugin from 'eslint-plugin-import';
+import jsxA11y from 'eslint-plugin-jsx-a11y';
+import nodePlugin from 'eslint-plugin-node';
+import prettierPlugin from 'eslint-plugin-prettier';
 
+/** @type {import('eslint').Linter.Config[]} */
 export default [
-	// Airbnb Base Configuration
-	airbnbBase,
-	// Prettier Configuration
-	prettierConfig,
+	pluginJs.configs.recommended,
+	// airbnb,
 	{
-		// Specify the files to apply this configuration
-		files: ['**/*.js'], // Adjust the glob pattern as needed
-		plugins: {
-			prettier: eslintPluginPrettier,
-			import: eslintPluginImport,
-		},
 		languageOptions: {
-			ecmaVersion: 'latest',
+			globals: { ...globals.browser, ...globals.node },
+			ecmaVersion: 2021,
 			sourceType: 'module',
 		},
-		env: {
-			node: true,
-			es2024: true,
+		plugins: {
+			react,
+			import: importPlugin,
+			'jsx-a11y': jsxA11y,
+			node: nodePlugin,
+			prettier: prettierPlugin,
 		},
 		rules: {
-			'prettier/prettier': 'error',
-			'spaced-comment': 'off',
-			'no-console': 'warn',
-			'consistent-return': 'off',
-			'func-names': 'off',
-			'object-shorthand': 'off',
-			'no-process-exit': 'off',
-			'no-param-reassign': 'off',
-			'no-return-await': 'off',
-			'no-underscore-dangle': 'off',
-			'class-methods-use-this': 'off',
-			'prefer-destructuring': [
+			'prettier/prettier': [
 				'error',
 				{
-					object: true,
-					array: false,
+					endOfLine: 'auto',
+					singleQuote: true,
 				},
 			],
-			'no-unused-vars': [
+			'react/react-in-jsx-scope': 'off',
+			'react/prop-types': 'off',
+			'react/jsx-props-no-spreading': 'off',
+			'import/prefer-default-export': 'off',
+			'jsx-a11y/anchor-is-valid': [
 				'error',
 				{
-					argsIgnorePattern: 'req|res|next|val',
+					components: ['Link'],
+					specialLink: ['href', 'to'],
+					aspects: ['invalidHref', 'preferButton'],
 				},
 			],
 		},
 	},
+	prettier,
 ];
