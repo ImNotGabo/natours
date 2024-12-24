@@ -4,7 +4,8 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"start": "node --watch server.js"
+		"start": "node --watch server.js",
+		"start:prod": "NODE_ENV=production node --watch server.js"
 	},
 	"keywords": [],
 	"author": "Gabriel Rodriguez",
@@ -12,5 +13,8 @@
 	"dependencies": {
 		"express": "4.21.2",
 		"morgan": "1.10.0"
+	},
+	"devDependencies": {
+		"dotenv": "^16.4.7"
 	}
 }
