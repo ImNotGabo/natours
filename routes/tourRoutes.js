@@ -1,5 +1,5 @@
-const express = require('express');
-const {
+import { Router } from 'express';
+import {
 	getAllTours,
 	getTour,
 	createTour,
@@ -7,13 +7,13 @@ const {
 	deleteTour,
 	checkID,
 	checkBody,
-} = require('../controllers/tourController');
+} from '../controllers/tourController.js';
 
-const router = express.Router();
+const router = Router();
 
 router.param('id', checkID);
 
 router.route('/').get(getAllTours).post(checkBody, createTour);
 router.route('/:id').get(getTour).patch(updateTour).delete(deleteTour);
 
-module.exports = router;
+export default router;

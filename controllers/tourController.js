@@ -1,11 +1,14 @@
-const fs = require('node:fs');
-const { writeFile } = require('node:fs/promises');
+import { readFileSync } from 'node:fs';
+import { writeFile } from 'node:fs/promises';
+import { getDirname } from '../utils.js';
+
+const __dirname = getDirname(import.meta.url);
 
 const tours = JSON.parse(
-	fs.readFileSync(`${__dirname}/../dev-data/data/tour-simple.json`)
+	readFileSync(`${__dirname}/../dev-data/data/tour-simple.json`)
 );
 
-exports.checkID = (req, res, next, value) => {
+export function checkID(req, res, next, value) {
 	console.log(`ID is: ${value}`);
 	const id = parseInt(req.params.id);
 	if (id > tours.length) {
@@ -15,9 +18,9 @@ exports.checkID = (req, res, next, value) => {
 		});
 	}
 	next();
-};
+}
 
-exports.checkBody = (req, res, next) => {
+export function checkBody(req, res, next) {
 	const { name, price } = req.body;
 	if (!name || !price) {
 		return res.status(400).json({
@@ -26,27 +29,27 @@ exports.checkBody = (req, res, next) => {
 		});
 	}
 	next();
-};
+}
 
-exports.getAllTours = (req, res) => {
+export function getAllTours(req, res) {
 	res.status(200).json({
 		status: 'success',
 		requestedAt: req.requestTime,
 		results: tours.length,
 		data: { tours },
 	});
-};
+}
 
-exports.getTour = (req, res) => {
+export function getTour(req, res) {
 	const id = parseInt(req.params.id);
 	const tour = tours.find((ele) => ele.id === id);
 	res.status(200).json({
 		status: 'success',
 		data: { tour },
 	});
-};
+}
 
-exports.createTour = async (req, res) => {
+export async function createTour(req, res) {
 	try {
 		// Basic body validation
 		if (!req.body) {
@@ -55,10 +58,10 @@ exports.createTour = async (req, res) => {
 				message: 'No data provided',
 			});
 		}
-
-		const newId = tours.length > 0 ? tours[tours.length - 1].id + 1 : 1;
-		const newTour = { id: newId, ...req.body };
-
+		await writeFile(
+			`${__dirname}/../dev-data/data/tour-simple.json`,
+			JSON.stringify(tours, null, 2) // JSON format
+		);
 		tours.push(newTour);
 
 		await writeFile(
@@ -79,20 +82,20 @@ exports.createTour = async (req, res) => {
 			error: process.env.NODE_ENV === 'development' ? error.message : undefined,
 		});
 	}
-};
+}
 
-exports.updateTour = (req, res) => {
+export function updateTour(req, res) {
 	res.status(200).json({
 		status: 'success',
 		data: {
 			tour: '<Updated tour here...>',
 		},
 	});
-};
+}
 
-exports.deleteTour = (req, res) => {
+export function deleteTour(req, res) {
 	res.status(204).json({
 		status: 'success',
 		data: null,
 	});
-};
+}

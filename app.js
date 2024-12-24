@@ -1,12 +1,16 @@
-const express = require('express');
-const morgan = require('morgan');
-const tourRouter = require('./routes/tourRoutes');
-const userRouter = require('./routes/userRoutes');
+import express from 'express';
+import morgan from 'morgan';
+import tourRouter from './routes/tourRoutes.js';
+import userRouter from './routes/userRoutes.js';
+import path from 'path';
+import { getDirname } from './utils.js';
+
+const __dirname = getDirname(import.meta.url);
 
 const app = express();
 
 // Middleware
-// console.log(process.env.NODE_ENV);
+app.use(express.static(path.join(__dirname, 'public')));
 if (process.env.NODE_ENV === 'development') {
 	app.use(morgan('dev'));
 }
@@ -23,4 +27,4 @@ app.use((req, res, next) => {
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 
-module.exports = app;
+export default app;
