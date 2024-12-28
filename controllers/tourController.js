@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { writeFile } from 'node:fs/promises';
-import { getDirname } from '../utils.js';
+import { getDirname } from '../utils/utils.js';
 
 const __dirname = getDirname(import.meta.url);
 
@@ -9,7 +9,6 @@ const tours = JSON.parse(
 );
 
 export function checkID(req, res, next, value) {
-	console.log(`ID is: ${value}`);
 	const id = parseInt(req.params.id);
 	if (id > tours.length) {
 		return res.status(404).json({
@@ -58,7 +57,7 @@ export async function createTour(req, res) {
 				message: 'No data provided',
 			});
 		}
-		await writeFile(
+		const newTour = await writeFile(
 			`${__dirname}/../dev-data/data/tour-simple.json`,
 			JSON.stringify(tours, null, 2) // JSON format
 		);
