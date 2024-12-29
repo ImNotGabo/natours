@@ -1,26 +1,42 @@
 import Tour from '../models/toursModel.js';
 
-export function getAllTours(req, res) {
-	res.status(200).json({
-		status: 'success',
-		requestedAt: req.requestTime,
-		/* results: tours.length,
-		data: { tours }, */
-	});
+export async function getAllTours(req, res) {
+	try {
+		const tours = await Tour.find();
+		res.status(200).json({
+			status: 'success',
+			results: tours.length,
+			data: {
+				tours,
+			},
+		});
+	} catch (error) {
+		res.status(404).json({
+			staus: 'fail',
+			message: error,
+		});
+	}
 }
 
-export function getTour(req, res) {
-	const id = parseInt(req.params.id);
-	/* const tour = tours.find((ele) => ele.id === id);
-	res.status(200).json({
-		status: 'success',
-		data: { tour },
-	}); */
+export async function getTour(req, res) {
+	try {
+		const tourID = await Tour.findById(req.params.id);
+		// Tour.findOne({ _id: req.params.id })
+		res.status(200).json({
+			status: 'success',
+			data: { tourID },
+		});
+	} catch (error) {
+		res.status(404).json({
+			status: 'fail',
+			message: `Tour not found: ${error}`,
+		});
+	}
 }
 
 export async function createTour(req, res) {
 	try {
-		const newTour = await Tour.create(req.body).then();
+		const newTour = await Tour.create(req.body);
 		res.status(201).json({
 			status: 'success',
 			data: {
