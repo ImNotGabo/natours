@@ -1,13 +1,8 @@
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 import app from '../app.js';
+import { PWD, USER } from '../utils/utils.js';
 
-dotenv.config();
-
-const user = process.env.DB_USER;
-const pwd = process.env.DB_PASSWORD;
-
-const DB = process.env.DB_HOST.replace(/USER:PWD/, `${user}:${pwd}`);
+const DB = process.env.DB_HOST.replace(/USER:PWD/, `${USER}:${PWD}`);
 mongoose.connect(DB).then(console.log('Connected!'));
 
 // Start the server
