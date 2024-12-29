@@ -29,7 +29,7 @@ export async function getTour(req, res) {
 	} catch (error) {
 		res.status(404).json({
 			status: 'fail',
-			message: `Tour not found: ${error}`,
+			message: `Could not found tour: ${error}`,
 		});
 	}
 }
@@ -46,7 +46,7 @@ export async function createTour(req, res) {
 	} catch (error) {
 		res.status(400).json({
 			status: 'fail',
-			message: error,
+			message: `Could not create a new tour: ${error}`,
 		});
 	}
 }
@@ -66,7 +66,7 @@ export async function updateTour(req, res) {
 	} catch (error) {
 		res.status().json({
 			status: 'fail',
-			message: error,
+			message: `Could not update tour: ${error}`,
 		});
 	}
 }
@@ -81,7 +81,7 @@ export async function deleteTour(req, res) {
 	} catch (error) {
 		res.status(400).json({
 			status: 'fail',
-			message: error,
+			message: `Could not delete tour: ${error}`,
 		});
 	}
 }
