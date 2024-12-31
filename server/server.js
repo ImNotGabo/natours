@@ -3,7 +3,7 @@ import app from '../app.js';
 import { PWD, USER } from '../utils/utils.js';
 
 const DB = process.env.DB_HOST.replace(/USER:PWD/, `${USER}:${PWD}`);
-mongoose.connect(DB).then(console.log('Connected!'));
+mongoose.connect(DB).then(console.log('Connected to DB!'));
 
 // Start the server
 const PORT = process.env.PORT || 3000;
