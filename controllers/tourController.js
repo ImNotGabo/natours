@@ -17,7 +17,22 @@ export async function getAllTours(req, res) {
 				return obj;
 			}, {});
 
-		const query = Tour.find(filteredObj);
+		/**
+		 * Converts the filtered object to a query string with MongoDB operators.
+		 *
+		 * This function takes a filtered object, converts it to a JSON string, and replaces
+		 * certain comparison operators (gte, gt, lte, lt) with their MongoDB equivalents
+		 * prefixed by a dollar sign ($).
+		 *
+		 * @param {Object} filteredObj - The object containing the filtered query parameters.
+		 * @returns {string} The query string with MongoDB operators.
+		 */
+		const queryStr = JSON.stringify(filteredObj).replace(
+			/\b(gte|gt|lte|lt)\b/g,
+			(match) => `$${match}`
+		);
+
+		const query = Tour.find(JSON.parse(queryStr));
 		const tours = await query;
 
 		res.status(200).json({
