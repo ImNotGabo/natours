@@ -1,8 +1,25 @@
 import Tour from '../models/toursModel.js';
+import { BLACKLISTED_QUERIES } from '../utils/utils.js';
 
 export async function getAllTours(req, res) {
 	try {
-		const tours = await Tour.find();
+		const queryObj = { ...req.query };
+		/**
+		 * Filters out blacklisted queries from the query object.
+		 *
+		 * @param {Object} queryObj - The original query object containing all queries.
+		 * @returns {Object} A new object containing only the allowed queries.
+		 */
+		const filteredObj = Object.keys(queryObj)
+			.filter((query) => !BLACKLISTED_QUERIES.includes(query))
+			.reduce((obj, key) => {
+				obj[key] = queryObj[key];
+				return obj;
+			}, {});
+
+		const query = Tour.find(filteredObj);
+		const tours = await query;
+
 		res.status(200).json({
 			status: 'success',
 			results: tours.length,
@@ -64,7 +81,7 @@ export async function updateTour(req, res) {
 			},
 		});
 	} catch (error) {
-		res.status().json({
+		res.status(400).json({
 			status: 'fail',
 			message: `Could not update tour: ${error}`,
 		});
