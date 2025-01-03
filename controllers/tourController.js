@@ -42,6 +42,15 @@ export async function getAllTours(req, res) {
 			query = query.sort('-createdAt');
 		}
 
+		// 3) Field limiting
+		const { fields } = req.query;
+		if (fields) {
+			query = query.select(`${fields} -_id`);
+		} else {
+			// Excluding ID
+			query = query.select('-__v -_id');
+		}
+
 		// EXECUTE QUERY
 		const tours = await query;
 
