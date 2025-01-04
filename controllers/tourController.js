@@ -1,5 +1,5 @@
 import Tour from '../models/toursModel.js';
-import { BLACKLISTED_QUERIES } from '../utils/utils.js';
+import { BLACKLISTED_QUERIES, pagination } from '../utils/utils.js';
 
 export async function getAllTours(req, res) {
 	try {
@@ -39,7 +39,7 @@ export async function getAllTours(req, res) {
 		if (sortBy) {
 			query = query.sort(sortBy);
 		} else {
-			query = query.sort('-createdAt');
+			query = query.sort('-createdAt _id');
 		}
 
 		// 3) Field limiting
@@ -49,6 +49,18 @@ export async function getAllTours(req, res) {
 		} else {
 			// Excluding ID
 			query = query.select('-__v -_id');
+		}
+
+		// 4)  Pagination
+		const { SKIP, LIMIT } = pagination(req);
+		const numTour = await Tour.countDocuments();
+		query = query.skip(SKIP).limit(LIMIT);
+
+		if (req.query.page && SKIP >= numTour) {
+			return res.status(404).json({
+				status: 'fail',
+				message: 'This page does not exist'
+			})
 		}
 
 		// EXECUTE QUERY
@@ -63,7 +75,7 @@ export async function getAllTours(req, res) {
 		});
 	} catch (error) {
 		res.status(404).json({
-			staus: 'fail',
+			status: 'fail',
 			message: error,
 		});
 	}
