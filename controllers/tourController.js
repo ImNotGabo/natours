@@ -2,6 +2,13 @@ import Tour from '../models/toursModel.js';
 import { BLACKLISTED_QUERIES, pagination } from '../utils/utils.js';
 import { DEFAULTS } from '../config.js';
 
+export async function aliasTopTours(req, res, next) {
+	req.query.limit = DEFAULTS.LIMIT;
+	req.query.sort = 'ratingsAverage,price';
+	req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+	next();
+}
+
 export async function getAllTours(req, res) {
 	try {
 		const queryObj = { ...req.query };
@@ -36,16 +43,18 @@ export async function getAllTours(req, res) {
 		let query = Tour.find(JSON.parse(queryStr));
 
 		// 2) Sorting
-		const sortBy = req.query.sort;
+		let sortBy = req.query.sort;
 		if (sortBy) {
+			sortBy = req.query.sort.replace(/,/g, ' ');
 			query = query.sort(sortBy);
 		} else {
 			query = query.sort(DEFAULTS.SORT);
 		}
 
 		// 3) Field limiting
-		const { fields } = req.query;
+		let { fields } = req.query;
 		if (fields) {
+			fields = req.query.fields.replace(/,/g, ' ');
 			query = query.select(`${fields} ${DEFAULTS.ID}`);
 		} else {
 			// Excluding ID
