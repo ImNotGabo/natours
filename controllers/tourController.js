@@ -1,6 +1,10 @@
 import Tour from '../models/toursModel.js';
-import { BLACKLISTED_QUERIES, pagination } from '../utils/utils.js';
+import { pagination } from '../utils/pagination.js';
 import { DEFAULTS } from '../config.js';
+import { filterQueries } from '../utils/filterQueries.js';
+import { convertToMongoQuery } from '../utils/convertToMongoQuery.js';
+import { sortQueryResults } from '../utils/sortQueryResults.js';
+import { limitQueryFields } from '../utils/limitQueryFields.js';
 
 export async function aliasTopTours(req, res, next) {
 	req.query.limit = DEFAULTS.LIMIT;
@@ -12,56 +16,17 @@ export async function aliasTopTours(req, res, next) {
 export async function getAllTours(req, res) {
 	try {
 		const queryObj = { ...req.query };
-		/**
-		 * Filters out blacklisted queries from the query object.
-		 *
-		 * @param {Object} queryObj - The original query object containing all queries.
-		 * @returns {Object} A new object containing only the allowed queries.
-		 */
-		const filteredObj = Object.keys(queryObj)
-			.filter((query) => !BLACKLISTED_QUERIES.includes(query))
-			.reduce((obj, key) => {
-				obj[key] = queryObj[key];
-				return obj;
-			}, {});
 
-		/**
-		 * Converts the filtered object to a query string with MongoDB operators.
-		 *
-		 * This function takes a filtered object, converts it to a JSON string, and replaces
-		 * certain comparison operators (gte, gt, lte, lt) with their MongoDB equivalents
-		 * prefixed by a dollar sign ($).
-		 *
-		 * @param {Object} filteredObj - The object containing the filtered query parameters.
-		 * @returns {string} The query string with MongoDB operators.
-		 */
-		const queryStr = JSON.stringify(filteredObj).replace(
-			/\b(gte|gt|lte|lt)\b/g,
-			(match) => `$${match}`
-		);
+		// 1) Filter queries
+		const filteredObj = filterQueries(queryObj);
+		const mongoQuery = convertToMongoQuery(filteredObj);
 
-		let query = Tour.find(JSON.parse(queryStr));
+		// 2) Sort queries
+		let query = Tour.find(mongoQuery);
+		query = sortQueryResults(query, req.query.sort);
+		query = limitQueryFields(query, req.query.fields);
 
-		// 2) Sorting
-		let sortBy = req.query.sort;
-		if (sortBy) {
-			sortBy = req.query.sort.replace(/,/g, ' ');
-			query = query.sort(sortBy);
-		} else {
-			query = query.sort(DEFAULTS.SORT);
-		}
-
-		// 3) Field limiting
-		let { fields } = req.query;
-		if (fields) {
-			fields = req.query.fields.replace(/,/g, ' ');
-			query = query.select(`${fields} ${DEFAULTS.ID}`);
-		} else {
-			// Excluding ID
-			query = query.select(DEFAULTS.FIELDS);
-		}
-
-		// 4)  Pagination
+		// 3)  Pagination
 		const { SKIP, LIMIT } = pagination(req);
 		const numTour = await Tour.countDocuments();
 		query = query.skip(SKIP).limit(LIMIT);
@@ -84,9 +49,10 @@ export async function getAllTours(req, res) {
 			},
 		});
 	} catch (error) {
+		console.error('Query object:', error);
 		res.status(404).json({
 			status: 'fail',
-			message: error,
+			message: error.message || 'Error retrieving tours',
 		});
 	}
 }
