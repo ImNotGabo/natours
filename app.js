@@ -3,7 +3,7 @@ import morgan from 'morgan';
 import tourRouter from './routes/tourRoutes.js';
 import userRouter from './routes/userRoutes.js';
 import path from 'path';
-import { getDirname } from './utils/utils.js';
+import { getDirname } from './utils/getDirname.js';
 
 const __dirname = getDirname(import.meta.url);
 
