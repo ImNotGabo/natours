@@ -1,5 +1,6 @@
 import Tour from '../models/toursModel.js';
 import { BLACKLISTED_QUERIES, pagination } from '../utils/utils.js';
+import { DEFAULTS } from '../config.js';
 
 export async function getAllTours(req, res) {
 	try {
@@ -39,16 +40,16 @@ export async function getAllTours(req, res) {
 		if (sortBy) {
 			query = query.sort(sortBy);
 		} else {
-			query = query.sort('-createdAt _id');
+			query = query.sort(DEFAULTS.SORT);
 		}
 
 		// 3) Field limiting
 		const { fields } = req.query;
 		if (fields) {
-			query = query.select(`${fields} -_id`);
+			query = query.select(`${fields} ${DEFAULTS.ID}`);
 		} else {
 			// Excluding ID
-			query = query.select('-__v -_id');
+			query = query.select(DEFAULTS.FIELDS);
 		}
 
 		// 4)  Pagination
@@ -59,8 +60,8 @@ export async function getAllTours(req, res) {
 		if (req.query.page && SKIP >= numTour) {
 			return res.status(404).json({
 				status: 'fail',
-				message: 'This page does not exist'
-			})
+				message: 'This page does not exist',
+			});
 		}
 
 		// EXECUTE QUERY
@@ -136,10 +137,10 @@ export async function updateTour(req, res) {
 
 export async function deleteTour(req, res) {
 	try {
-		const deleteTour = await Tour.findByIdAndDelete(req.params.id);
+		await Tour.findByIdAndDelete(req.params.id);
 		res.status(204).json({
 			status: 'success',
-			data: deleteTour,
+			data: null,
 		});
 	} catch (error) {
 		res.status(400).json({
