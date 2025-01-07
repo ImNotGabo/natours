@@ -26,7 +26,7 @@ export async function getAllTours(req, res) {
 		query = sortQueryResults(query, req.query.sort);
 		query = limitQueryFields(query, req.query.fields);
 
-		// 3)  Pagination
+		// 3) Pagination
 		const { SKIP, LIMIT } = pagination(req);
 		const numTour = await Tour.countDocuments();
 		query = query.skip(SKIP).limit(LIMIT);
@@ -34,7 +34,8 @@ export async function getAllTours(req, res) {
 		if (req.query.page && SKIP >= numTour) {
 			return res.status(404).json({
 				status: 'fail',
-				message: 'This page does not exist',
+				message:
+					'This page does not exist. Please adjust your pagination parameters.',
 			});
 		}
 
@@ -49,26 +50,31 @@ export async function getAllTours(req, res) {
 			},
 		});
 	} catch (error) {
-		console.error('Query object:', error);
-		res.status(404).json({
-			status: 'fail',
-			message: error.message || 'Error retrieving tours',
+		res.status(500).json({
+			status: 'error',
+			message:
+				error.message || 'An unexpected error occurred while retrieving tours.',
 		});
 	}
 }
 
 export async function getTour(req, res) {
 	try {
-		const tourID = await Tour.findById(req.params.id);
-		// Tour.findOne({ _id: req.params.id })
+		const tour = await Tour.findById(req.params.id);
+		if (!tour) {
+			return res.status(404).json({
+				status: 'fail',
+				message: `No tour found with ID: ${req.params.id}`,
+			});
+		}
 		res.status(200).json({
 			status: 'success',
-			data: { tourID },
+			data: { tour },
 		});
 	} catch (error) {
-		res.status(404).json({
+		res.status(400).json({
 			status: 'fail',
-			message: `Could not found tour: ${error}`,
+			message: error.message || `Invalid ID: ${req.params.id}`,
 		});
 	}
 }
@@ -85,7 +91,9 @@ export async function createTour(req, res) {
 	} catch (error) {
 		res.status(400).json({
 			status: 'fail',
-			message: `Could not create a new tour: ${error}`,
+			message:
+				error.message ||
+				'Failed to create a new tour. Please check your input data.',
 		});
 	}
 }
@@ -96,6 +104,12 @@ export async function updateTour(req, res) {
 			new: true,
 			runValidators: true,
 		});
+		if (!updatedTour) {
+			return res.status(404).json({
+				status: 'fail',
+				message: `No tour found with ID: ${req.params.id}`,
+			});
+		}
 		res.status(200).json({
 			status: 'success',
 			data: {
@@ -105,14 +119,22 @@ export async function updateTour(req, res) {
 	} catch (error) {
 		res.status(400).json({
 			status: 'fail',
-			message: `Could not update tour: ${error}`,
+			message:
+				error.message ||
+				`Failed to update tour with ID: ${req.params.id}. Please check your input data.`,
 		});
 	}
 }
 
 export async function deleteTour(req, res) {
 	try {
-		await Tour.findByIdAndDelete(req.params.id);
+		const deletedTour = await Tour.findByIdAndDelete(req.params.id);
+		if (!deletedTour) {
+			return res.status(404).json({
+				status: 'fail',
+				message: `No tour found with ID: ${req.params.id}`,
+			});
+		}
 		res.status(204).json({
 			status: 'success',
 			data: null,
@@ -120,7 +142,8 @@ export async function deleteTour(req, res) {
 	} catch (error) {
 		res.status(400).json({
 			status: 'fail',
-			message: `Could not delete tour: ${error}`,
+			message:
+				error.message || `Failed to delete tour with ID: ${req.params.id}`,
 		});
 	}
 }
@@ -153,9 +176,10 @@ export async function getTourStats(req, res) {
 			},
 		});
 	} catch (error) {
-		res.status(404).json({
+		res.status(500).json({
 			status: 'fail',
-			message: error.message,
+			message:
+				error.message || 'An error occurred while calculating tour statistics.',
 		});
 	}
 }
@@ -204,7 +228,9 @@ export async function getMonthlyPlan(req, res) {
 	} catch (error) {
 		res.status(400).json({
 			status: 'fail',
-			message: error.message,
+			message:
+				error.message ||
+				`Failed to retrieve the monthly plan for year: ${req.params.year}`,
 		});
 	}
 }
